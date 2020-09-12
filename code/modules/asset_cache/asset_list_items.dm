@@ -3,21 +3,21 @@
 /datum/asset/simple/tgui_common
 	keep_local_name = TRUE
 	assets = list(
-		"tgui-common.chunk.js" = 'tgui/packages/tgui/public/tgui-common.chunk.js',
+		"tgui-common.chunk.js" = 'tgui/public/tgui-common.chunk.js',
 	)
 
 /datum/asset/simple/tgui
 	keep_local_name = TRUE
 	assets = list(
-		"tgui.bundle.js" = 'tgui/packages/tgui/public/tgui.bundle.js',
-		"tgui.bundle.css" = 'tgui/packages/tgui/public/tgui.bundle.css',
+		"tgui.bundle.js" = 'tgui/public/tgui.bundle.js',
+		"tgui.bundle.css" = 'tgui/public/tgui.bundle.css',
 	)
 
 /datum/asset/simple/tgui_panel
 	keep_local_name = TRUE
 	assets = list(
-		"tgui-panel.bundle.js" = 'tgui/packages/tgui/public/tgui-panel.bundle.js',
-		"tgui-panel.bundle.css" = 'tgui/packages/tgui/public/tgui-panel.bundle.css',
+		"tgui-panel.bundle.js" = 'tgui/public/tgui-panel.bundle.js',
+		"tgui-panel.bundle.css" = 'tgui/public/tgui-panel.bundle.css',
 	)
 
 /datum/asset/simple/headers
@@ -156,7 +156,6 @@
 	)
 
 /datum/asset/simple/namespaced/fontawesome
-	legacy = TRUE
 	assets = list(
 		"fa-regular-400.eot"  = 'html/font-awesome/webfonts/fa-regular-400.eot',
 		"fa-regular-400.woff" = 'html/font-awesome/webfonts/fa-regular-400.woff',
@@ -245,6 +244,7 @@
 		"clownthanks" = 'icons/UI_Icons/Achievements/Misc/clownthanks.png',
 		"rule8" = 'icons/UI_Icons/Achievements/Misc/rule8.png',
 		"snail" = 'icons/UI_Icons/Achievements/Misc/snail.png',
+		"ascension" = 'icons/UI_Icons/Achievements/Misc/ascension.png',
 		"mining" = 'icons/UI_Icons/Achievements/Skills/mining.png',
 		"assistant" = 'icons/UI_Icons/Achievements/Mafia/assistant.png',
 		"changeling" = 'icons/UI_Icons/Achievements/Mafia/changeling.png',
@@ -261,7 +261,8 @@
 		"psychologist" = 'icons/UI_Icons/Achievements/Mafia/psychologist.png',
 		"thoughtfeeder" = 'icons/UI_Icons/Achievements/Mafia/thoughtfeeder.png',
 		"traitor" = 'icons/UI_Icons/Achievements/Mafia/traitor.png',
-		"basemafia" ='icons/UI_Icons/Achievements/basemafia.png'
+		"basemafia" ='icons/UI_Icons/Achievements/basemafia.png',
+		"frenching" = 'icons/UI_Icons/Achievements/Misc/frenchingthebubble.png'
 	)
 
 /datum/asset/spritesheet/simple/pills
@@ -305,6 +306,35 @@
 	for (var/each in list('icons/obj/atmospherics/pipes/pipe_item.dmi', 'icons/obj/atmospherics/pipes/disposal.dmi', 'icons/obj/atmospherics/pipes/transit_tube.dmi', 'icons/obj/plumbing/fluid_ducts.dmi'))
 		InsertAll("", each, GLOB.alldirs)
 	..()
+
+/datum/asset/spritesheet/supplypods
+	name = "supplypods"
+
+/datum/asset/spritesheet/supplypods/register()
+	for (var/style in 1 to length(GLOB.podstyles))
+		if (style == STYLE_SEETHROUGH)
+			Insert("pod_asset[style]", icon('icons/obj/supplypods.dmi' , "seethrough-icon"))
+			continue
+		var/base = GLOB.podstyles[style][POD_BASE]
+		if (!base)
+			Insert("pod_asset[style]", icon('icons/obj/supplypods.dmi', "invisible-icon"))
+			continue
+		var/icon/podIcon = icon('icons/obj/supplypods.dmi', base)
+		var/door = GLOB.podstyles[style][POD_DOOR]
+		if (door)
+			door = "[base]_door"
+			podIcon.Blend(icon('icons/obj/supplypods.dmi', door), ICON_OVERLAY)
+		var/shape = GLOB.podstyles[style][POD_SHAPE]
+		if (shape == POD_SHAPE_NORML)
+			var/decal = GLOB.podstyles[style][POD_DECAL]
+			if (decal)
+				podIcon.Blend(icon('icons/obj/supplypods.dmi', decal), ICON_OVERLAY)
+			var/glow = GLOB.podstyles[style][POD_GLOW]
+			if (glow)
+				glow = "pod_glow_[glow]"
+				podIcon.Blend(icon('icons/obj/supplypods.dmi', glow), ICON_OVERLAY)
+		Insert("pod_asset[style]", podIcon)
+	return ..()
 
 // Representative icons for each research design
 /datum/asset/spritesheet/research_designs
