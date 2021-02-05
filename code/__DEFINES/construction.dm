@@ -63,9 +63,6 @@
 //windows affected by Nar'Sie turn this color.
 #define NARSIE_WINDOW_COLOUR "#7D1919"
 
-//let's just pretend fulltile windows being children of border windows is fine
-#define FULLTILE_WINDOW_DIR NORTHEAST
-
 //The amount of materials you get from a sheet of mineral like iron/diamond/glass etc
 #define MINERAL_MATERIAL_AMOUNT 2000
 //The maximum size of a stack object.
@@ -112,6 +109,8 @@
 #define RCD_UPGRADE_SIMPLE_CIRCUITS	(1<<1)
 #define RCD_UPGRADE_SILO_LINK (1<<2)
 #define RCD_UPGRADE_FURNISHING (1<<3)
+
+#define RPD_UPGRADE_UNWRENCH (1<<0)
 
 #define RCD_WINDOW_FULLTILE "full tile"
 #define RCD_WINDOW_DIRECTIONAL "directional"

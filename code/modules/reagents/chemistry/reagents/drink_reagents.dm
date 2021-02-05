@@ -127,9 +127,10 @@
 	glass_desc = "The raw essence of a banana. HONK."
 
 /datum/reagent/consumable/banana/on_mob_life(mob/living/carbon/M)
-	if((ishuman(M) && M.job == "Clown") || ismonkey(M))
-		M.heal_bodypart_damage(1,1, 0)
-		. = 1
+	var/obj/item/organ/liver/liver = M.getorganslot(ORGAN_SLOT_LIVER)
+	if((liver && HAS_TRAIT(liver, TRAIT_COMEDY_METABOLISM)) || ismonkey(M))
+		M.heal_bodypart_damage(brute = 1, burn = 1)
+		. = TRUE
 	..()
 
 /datum/reagent/consumable/nothing
@@ -211,8 +212,8 @@
 	if(M.getBruteLoss() && prob(20))
 		M.heal_bodypart_damage(1,0, 0)
 		. = 1
-	if(M.has_reagent(/datum/reagent/consumable/capsaicin))
-		M.remove_reagent(/datum/reagent/consumable/capsaicin, 2)
+	if(holder.has_reagent(/datum/reagent/consumable/capsaicin))
+		holder.remove_reagent(/datum/reagent/consumable/capsaicin, 2)
 	..()
 
 /datum/reagent/consumable/soymilk
@@ -263,11 +264,11 @@
 /datum/reagent/consumable/coffee/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-5)
 	M.drowsyness = max(0,M.drowsyness-3)
-	M.AdjustSleeping(-40, FALSE)
+	M.AdjustSleeping(-40)
 	//310.15 is the normal bodytemp.
 	M.adjust_bodytemperature(25 * TEMPERATURE_DAMAGE_COEFFICIENT, 0, M.get_body_temp_normal())
-	if(M.has_reagent(/datum/reagent/consumable/frostoil))
-		M.remove_reagent(/datum/reagent/consumable/frostoil, 5)
+	if(holder.has_reagent(/datum/reagent/consumable/frostoil))
+		holder.remove_reagent(/datum/reagent/consumable/frostoil, 5)
 	..()
 	. = 1
 
@@ -285,7 +286,7 @@
 	M.dizziness = max(0,M.dizziness-2)
 	M.drowsyness = max(0,M.drowsyness-1)
 	M.jitteriness = max(0,M.jitteriness-3)
-	M.AdjustSleeping(-20, FALSE)
+	M.AdjustSleeping(-20)
 	if(M.getToxLoss() && prob(20))
 		M.adjustToxLoss(-1, 0)
 	M.adjust_bodytemperature(20 * TEMPERATURE_DAMAGE_COEFFICIENT, 0, M.get_body_temp_normal())
@@ -332,7 +333,7 @@
 /datum/reagent/consumable/icecoffee/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-5)
 	M.drowsyness = max(0,M.drowsyness-3)
-	M.AdjustSleeping(-40, FALSE)
+	M.AdjustSleeping(-40)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
 	M.Jitter(5)
 	..()
@@ -351,7 +352,7 @@
 /datum/reagent/consumable/hot_ice_coffee/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-5)
 	M.drowsyness = max(0,M.drowsyness-3)
-	M.AdjustSleeping(-60, FALSE)
+	M.AdjustSleeping(-60)
 	M.adjust_bodytemperature(-7 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
 	M.Jitter(5)
 	M.adjustToxLoss(1*REM, 0)
@@ -371,7 +372,7 @@
 /datum/reagent/consumable/icetea/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-2)
 	M.drowsyness = max(0,M.drowsyness-1)
-	M.AdjustSleeping(-40, FALSE)
+	M.AdjustSleeping(-40)
 	if(M.getToxLoss() && prob(20))
 		M.adjustToxLoss(-1, 0)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
@@ -415,7 +416,7 @@
 	M.set_drugginess(30)
 	M.dizziness +=1.5
 	M.drowsyness = 0
-	M.AdjustSleeping(-40, FALSE)
+	M.AdjustSleeping(-40)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
 	..()
 	. = 1
@@ -442,7 +443,7 @@
 	M.Jitter(20)
 	M.dizziness +=1
 	M.drowsyness = 0
-	M.AdjustSleeping(-40, FALSE)
+	M.AdjustSleeping(-40)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
 	..()
 
@@ -457,7 +458,7 @@
 
 /datum/reagent/consumable/spacemountainwind/on_mob_life(mob/living/carbon/M)
 	M.drowsyness = max(0,M.drowsyness-7)
-	M.AdjustSleeping(-20, FALSE)
+	M.AdjustSleeping(-20)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
 	M.Jitter(5)
 	..()
@@ -576,7 +577,7 @@
 /datum/reagent/consumable/tonic/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-5)
 	M.drowsyness = max(0,M.drowsyness-3)
-	M.AdjustSleeping(-40, FALSE)
+	M.AdjustSleeping(-40)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
 	..()
 	. = 1
@@ -595,7 +596,7 @@
 	M.Jitter(20)
 	M.dizziness +=1
 	M.drowsyness = 0
-	M.AdjustSleeping(-40, FALSE)
+	M.AdjustSleeping(-40)
 	M.adjust_bodytemperature(-5 * TEMPERATURE_DAMAGE_COEFFICIENT, M.get_body_temp_normal())
 	..()
 
@@ -640,7 +641,7 @@
 /datum/reagent/consumable/soy_latte/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-5)
 	M.drowsyness = max(0,M.drowsyness-3)
-	M.SetSleeping(0, FALSE)
+	M.SetSleeping(0)
 	M.adjust_bodytemperature(5 * TEMPERATURE_DAMAGE_COEFFICIENT, 0, M.get_body_temp_normal())
 	M.Jitter(5)
 	if(M.getBruteLoss() && prob(20))
@@ -661,7 +662,7 @@
 /datum/reagent/consumable/cafe_latte/on_mob_life(mob/living/carbon/M)
 	M.dizziness = max(0,M.dizziness-5)
 	M.drowsyness = max(0,M.drowsyness-3)
-	M.SetSleeping(0, FALSE)
+	M.SetSleeping(0)
 	M.adjust_bodytemperature(5 * TEMPERATURE_DAMAGE_COEFFICIENT, 0, M.get_body_temp_normal())
 	M.Jitter(5)
 	if(M.getBruteLoss() && prob(20))
@@ -685,7 +686,9 @@
 	M.adjustToxLoss(-0.5, 0)
 	M.adjustOxyLoss(-0.5, 0)
 	if(M.nutrition && (M.nutrition - 2 > 0))
-		if(!(M.mind && (M.mind.assigned_role in GLOB.medical_positions))) //Drains the nutrition of the holder. Not medical doctors though, since it's the Doctor's Delight!
+		var/obj/item/organ/liver/liver = M.getorganslot(ORGAN_SLOT_LIVER)
+		if(!(HAS_TRAIT(liver, TRAIT_MEDICAL_METABOLISM)))
+			// Drains the nutrition of the holder. Not medical doctors though, since it's the Doctor's Delight!
 			M.adjust_nutrition(-2)
 	..()
 	. = 1

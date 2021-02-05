@@ -45,8 +45,9 @@
 			I.forceMove(loc)
 	qdel(src)
 
-/obj/structure/filingcabinet/attackby(obj/item/P, mob/user, params)
-	if(P.tool_behaviour == TOOL_WRENCH && user.a_intent != INTENT_HELP)
+/obj/structure/filingcabinet/attackby(obj/item/P, mob/living/user, params)
+	var/list/modifiers = params2list(params)
+	if(P.tool_behaviour == TOOL_WRENCH && modifiers && modifiers["right"])
 		to_chat(user, "<span class='notice'>You begin to [anchored ? "unwrench" : "wrench"] [src].</span>")
 		if(P.use_tool(src, user, 20, volume=50))
 			to_chat(user, "<span class='notice'>You successfully [anchored ? "unwrench" : "wrench"] [src].</span>")
@@ -59,7 +60,7 @@
 		sleep(5)
 		icon_state = initial(icon_state)
 		updateUsrDialog()
-	else if(user.a_intent != INTENT_HARM)
+	else if(!user.combat_mode)
 		to_chat(user, "<span class='warning'>You can't put [P] in [src]!</span>")
 	else
 		return ..()
@@ -79,13 +80,15 @@
 	dat += "</table></center>"
 	user << browse("<html><head><meta http-equiv='Content-Type' content='text/html; charset=UTF-8'><title>[name]</title></head><body>[dat]</body></html>", "window=filingcabinet;size=350x300")
 
+
 /obj/structure/filingcabinet/attack_tk(mob/user)
 	if(anchored)
-		attack_self_tk(user)
-	else
-		..()
+		return attack_self_tk(user)
+	return ..()
+
 
 /obj/structure/filingcabinet/attack_self_tk(mob/user)
+	. = COMPONENT_CANCEL_ATTACK_CHAIN
 	if(contents.len)
 		if(prob(40 + contents.len * 5))
 			var/obj/item/I = pick(contents)
@@ -96,8 +99,9 @@
 			return
 	to_chat(user, "<span class='notice'>You find nothing in [src].</span>")
 
+
 /obj/structure/filingcabinet/Topic(href, href_list)
-	if(!usr.canUseTopic(src, BE_CLOSE, ismonkey(usr)))
+	if(!usr.canUseTopic(src, BE_CLOSE, NO_DEXTERITY, FALSE, !iscyborg(usr)))
 		return
 	if(href_list["retrieve"])
 		usr << browse("", "window=filingcabinet") // Close the menu

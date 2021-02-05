@@ -146,7 +146,7 @@
 	toggle_igniter(user)
 
 /obj/item/flamethrower/AltClick(mob/user)
-	if(ptank && isliving(user) && user.canUseTopic(src, BE_CLOSE, ismonkey(user)))
+	if(ptank && isliving(user) && user.canUseTopic(src, BE_CLOSE, NO_DEXTERITY, FALSE, TRUE))
 		user.put_in_hands(ptank)
 		ptank = null
 		to_chat(user, "<span class='notice'>You remove the plasma tank from [src]!</span>")
@@ -221,7 +221,7 @@
 	//Burn it based on transfered gas
 	target.hotspot_expose((ptank.air_contents.temperature*2) + 380,500)
 	//location.hotspot_expose(1000,500,1)
-	SSair.add_to_active(target, 0)
+	SSair.add_to_active(target)
 
 /obj/item/flamethrower/Initialize(mapload)
 	. = ..()
@@ -236,6 +236,7 @@
 		if(create_with_tank)
 			ptank = new /obj/item/tank/internals/plasma/full(src)
 		update_icon()
+	RegisterSignal(src, COMSIG_ITEM_RECHARGED, .proc/instant_refill)
 
 /obj/item/flamethrower/full
 	create_full = TRUE
@@ -259,3 +260,11 @@
 
 /obj/item/assembly/igniter/proc/ignite_turf(obj/item/flamethrower/F,turf/open/location,release_amount = 0.05)
 	F.default_ignite(location,release_amount)
+
+/obj/item/flamethrower/proc/instant_refill()
+	if(ptank)
+		ptank.air_contents.assert_gas(/datum/gas/plasma)
+		ptank.air_contents.gases[/datum/gas/plasma][MOLES] = (10*ONE_ATMOSPHERE)*ptank.volume/(R_IDEAL_GAS_EQUATION*T20C)
+	else
+		ptank = new /obj/item/tank/internals/plasma/full(src)
+	update_icon()

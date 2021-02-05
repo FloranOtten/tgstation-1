@@ -3,7 +3,7 @@
 	var/obj/item/claymore/highlander/sword
 	show_in_antagpanel = FALSE
 	show_name_in_check_antagonists = TRUE
-	can_hijack = HIJACK_HIJACKER
+	can_elimination_hijack = ELIMINATION_ENABLED
 
 /datum/antagonist/highlander/apply_innate_effects(mob/living/mob_override)
 	var/mob/living/L = owner.current || mob_override
@@ -25,10 +25,9 @@
 	steal_objective.owner = owner
 	steal_objective.set_target(new /datum/objective_item/steal/nukedisc)
 	objectives += steal_objective
-
-	var/datum/objective/hijack/highlander/hijack_objective = new
-	hijack_objective.owner = owner
-	objectives += hijack_objective
+	var/datum/objective/elimination/highlander/elimination_objective = new
+	elimination_objective.owner = owner
+	objectives += elimination_objective
 
 /datum/antagonist/highlander/on_gain()
 	forge_objectives()
@@ -100,5 +99,5 @@
 	robotlander.laws.clear_inherent_laws()
 	robotlander.laws.set_zeroth_law("THERE CAN BE ONLY ONE")
 	robotlander.laws.show_laws(robotlander)
-	robotlander.module.transform_to(/obj/item/robot_module/syndicate/kiltborg)
-	sword = locate(/obj/item/claymore/highlander/robot) in robotlander.module.basic_modules
+	robotlander.model.transform_to(/obj/item/robot_model/syndicate/kiltborg)
+	sword = locate(/obj/item/claymore/highlander/robot) in robotlander.model.basic_modules

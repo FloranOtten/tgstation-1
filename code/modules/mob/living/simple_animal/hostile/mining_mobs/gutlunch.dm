@@ -26,7 +26,7 @@
 	response_harm_simple = "squish"
 	friendly_verb_continuous = "pinches"
 	friendly_verb_simple = "pinch"
-	a_intent = INTENT_HELP
+	combat_mode = FALSE
 	ventcrawler = VENTCRAWLER_ALWAYS
 	gold_core_spawnable = FRIENDLY_SPAWN
 	stat_attack = HARD_CRIT
@@ -154,7 +154,7 @@
 	L.setDir(dir)
 	L.Stun(20, ignore_canstun = TRUE)
 	visible_message("<span class='notice'>[src] grows up into [L].</span>")
-	Destroy()
+	qdel(src)
 
 //Gutlunch udder
 /obj/item/udder/gutlunch

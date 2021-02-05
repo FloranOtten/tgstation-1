@@ -3,7 +3,7 @@
 	icon_state = "0"
 	state = 0
 
-/obj/structure/frame/computer/attackby(obj/item/P, mob/user, params)
+/obj/structure/frame/computer/attackby(obj/item/P, mob/living/user, params)
 	add_fingerprint(user)
 	switch(state)
 		if(0)
@@ -154,7 +154,7 @@
 
 				qdel(src)
 				return
-	if(user.a_intent == INTENT_HARM)
+	if(user.combat_mode)
 		return ..()
 
 
@@ -169,7 +169,7 @@
 
 /obj/structure/frame/computer/AltClick(mob/user)
 	..()
-	if(!isliving(user) || !user.canUseTopic(src, BE_CLOSE, ismonkey(user)))
+	if(!user.canUseTopic(src, BE_CLOSE, NO_DEXTERITY, FALSE, !iscyborg(user)))
 		return
 
 	if(anchored)

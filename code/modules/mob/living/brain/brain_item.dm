@@ -12,7 +12,7 @@
 	attack_verb_simple = list("attack", "slap", "whack")
 
 	///The brain's organ variables are significantly more different than the other organs, with half the decay rate for balance reasons, and twice the maxHealth
-	decay_factor = STANDARD_ORGAN_DECAY	/ 2		//30 minutes of decaying to result in a fully damaged brain, since a fast decay rate would be unfun gameplay-wise
+	decay_factor = STANDARD_ORGAN_DECAY	* 0.5		//30 minutes of decaying to result in a fully damaged brain, since a fast decay rate would be unfun gameplay-wise
 
 	maxHealth = BRAIN_DAMAGE_DEATH
 	low_threshold = 45
@@ -110,7 +110,7 @@
 /obj/item/organ/brain/attackby(obj/item/O, mob/user, params)
 	user.changeNext_move(CLICK_CD_MELEE)
 
-	if(istype(O, /obj/item/organ_storage))
+	if(istype(O, /obj/item/borg/apparatus/organ_storage))
 		return //Borg organ bags shouldn't be killing brains
 
 	if((organ_flags & ORGAN_FAILING) && O.is_drainable() && O.reagents.has_reagent(/datum/reagent/medicine/mannitol)) //attempt to heal the brain
@@ -124,7 +124,7 @@
 			return
 
 		user.visible_message("<span class='notice'>[user] starts to pour the contents of [O] onto [src].</span>", "<span class='notice'>You start to slowly pour the contents of [O] onto [src].</span>")
-		if(!do_after(user, 60, TRUE, src))
+		if(!do_after(user, 6 SECONDS, src))
 			to_chat(user, "<span class='warning'>You failed to pour [O] onto [src]!</span>")
 			return
 
@@ -288,6 +288,8 @@
 
 		// Directly change the new holding_brain.
 		skillchip.holding_brain = replacement_brain
+		//And move the actual obj into the new brain (contents)
+		skillchip.forceMove(replacement_brain)
 
 		// Directly add them to the skillchip list in the new brain.
 		LAZYADD(replacement_brain.skillchips, skillchip)

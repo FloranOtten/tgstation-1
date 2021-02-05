@@ -2,6 +2,7 @@
 	desc = "An aging combat exosuit utilized by the Nanotrasen corporation. Originally developed to combat hostile alien lifeforms."
 	name = "\improper Durand"
 	icon_state = "durand"
+	base_icon_state = "durand"
 	movedelay = 4
 	dir_in = 1 //Facing North.
 	max_integrity = 400
@@ -54,7 +55,7 @@
 	if(defense_mode)
 		var/datum/action/action = LAZYACCESSASSOC(occupant_actions, M, /datum/action/vehicle/sealed/mecha/mech_defense_mode)
 		if(action)
-			action.Trigger(FALSE)
+			INVOKE_ASYNC(action, /datum/action.proc/Trigger, FALSE)
 	return ..()
 
 ///Relays the signal from the action button to the shield, and creates a new shield if the old one is MIA.
@@ -168,22 +169,22 @@ own integrity back to max. Shield is automatically dropped if we run out of powe
 	return ..()
 
 /**
-  * Handles activating and deactivating the shield.
-  *
-  * This proc is called by a signal sent from the mech's action button and
-  * relayed by the mech itself. The "forced" variable, `signal_args[1]`, will
-  * skip the to-pilot text and is meant for when the shield is disabled by
-  * means other than the action button (like running out of power).
-  *
-  * Arguments:
-  * * source: the shield
-  * * owner: mob that activated the shield
-  * * signal_args: whether it's forced
-  */
+ * Handles activating and deactivating the shield.
+ *
+ * This proc is called by a signal sent from the mech's action button and
+ * relayed by the mech itself. The "forced" variable, `signal_args[1]`, will
+ * skip the to-pilot text and is meant for when the shield is disabled by
+ * means other than the action button (like running out of power).
+ *
+ * Arguments:
+ * * source: the shield
+ * * owner: mob that activated the shield
+ * * signal_args: whether it's forced
+ */
 /obj/durand_shield/proc/activate(datum/source, mob/owner, list/signal_args)
 	SIGNAL_HANDLER
 	currentuser = owner
-	if(!chassis?.occupants)
+	if(!LAZYLEN(chassis?.occupants))
 		return
 	if(switching && !signal_args[1])
 		return

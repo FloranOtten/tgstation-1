@@ -109,6 +109,7 @@
 		H.underwear = "Nude"
 		H.update_body()
 		ADD_TRAIT(H, TRAIT_PRIMITIVE, ROUNDSTART_TRAIT)
+		H.remove_language(/datum/language/common)
 	team.players_spawned += (new_spawn.key)
 	eggshell.egg = null
 	qdel(eggshell)
@@ -697,7 +698,7 @@
 	name = "Beach Bum"
 	glasses = /obj/item/clothing/glasses/sunglasses
 	r_pocket = /obj/item/storage/wallet/random
-	l_pocket = /obj/item/reagent_containers/food/snacks/pizzaslice/dank;
+	l_pocket = /obj/item/food/pizzaslice/dank
 	uniform = /obj/item/clothing/under/pants/youngfolksjeans
 	id = /obj/item/card/id
 

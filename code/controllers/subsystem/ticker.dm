@@ -27,8 +27,8 @@ SUBSYSTEM_DEF(ticker)
 	var/admin_delay_notice = ""				//a message to display to anyone who tries to restart the world after a delay
 	var/ready_for_reboot = FALSE			//all roundend preparation done with, all that's left is reboot
 
-	///If not set to ANON_DISABLED then people spawn with a themed anon name (see anonymousnames.dm)
-	var/anonymousnames = ANON_DISABLED
+	///If set to an anonymous theme datum then people spawn with said themed anon name (see anonymousnames.dm)
+	var/datum/anonymous_theme/anonymousnames
 	///Boolean to see if the game needs to set up a triumvirate ai (see tripAI.dm)
 	var/triai = FALSE
 
@@ -408,7 +408,7 @@ SUBSYSTEM_DEF(ticker)
 			qdel(player)
 			living.notransform = TRUE
 			if(living.client)
-				var/obj/screen/splash/S = new(living.client, TRUE)
+				var/atom/movable/screen/splash/S = new(living.client, TRUE)
 				S.Fade(TRUE)
 				living.client.init_verbs()
 			livings += living
@@ -456,7 +456,7 @@ SUBSYSTEM_DEF(ticker)
 		if(5) //every 5 ticks check if there is a slot available
 			listclearnulls(queued_players)
 			if(living_player_count() < hpc)
-				if(next_in_line && next_in_line.client)
+				if(next_in_line?.client)
 					to_chat(next_in_line, "<span class='userdanger'>A slot has opened! You have approximately 20 seconds to join. <a href='?src=[REF(next_in_line)];late_join=override'>\>\>Join Game\<\<</a></span>")
 					SEND_SOUND(next_in_line, sound('sound/misc/notice1.ogg'))
 					next_in_line.LateChoices()
@@ -606,6 +606,10 @@ SUBSYSTEM_DEF(ticker)
 	fdel(F)
 	WRITE_FILE(F, the_mode)
 
+/// Returns if either the master mode or the forced secret ruleset matches the mode name.
+/datum/controller/subsystem/ticker/proc/is_mode(mode_name)
+	return GLOB.master_mode == mode_name || GLOB.secret_force_mode == mode_name
+
 /datum/controller/subsystem/ticker/proc/SetRoundEndSound(the_sound)
 	set waitfor = FALSE
 	round_end_sound_sent = FALSE
@@ -676,12 +680,3 @@ SUBSYSTEM_DEF(ticker)
 			SEND_SOUND(M.client, end_of_round_sound_ref)
 
 	text2file(login_music, "data/last_round_lobby_music.txt")
-
-/datum/controller/subsystem/ticker/Topic(href, list/href_list)
-	. = ..()
-	if(href_list["cancel_heart"] && usr.client.holder)
-		var/mob/heart_sender = locate(href_list["heart_source"])
-		var/mob/intended_recepient = locate(href_list["heart_target"])
-		log_admin("[usr.ckey] blocked commendation from [heart_sender] ([heart_sender.ckey]) to [intended_recepient] ([intended_recepient.ckey])")
-		message_admins("[usr.ckey] blocked commendation from [heart_sender] ([heart_sender.ckey]) to [intended_recepient] ([intended_recepient.ckey])")
-		hearts[intended_recepient] = null

@@ -19,8 +19,8 @@
 		seed = new seed()
 		seed.adjust_potency(50-seed.potency)
 
-	pixel_x = rand(-5, 5)
-	pixel_y = rand(-5, 5)
+	pixel_x = base_pixel_x + rand(-5, 5)
+	pixel_y = base_pixel_y + rand(-5, 5)
 
 	if(seed)
 		for(var/datum/plant_gene/trait/T in seed.genes)
@@ -31,15 +31,11 @@
 		transform *= TRANSFORM_USING_VARIABLE(seed.potency, 100) + 0.5
 		add_juice()
 
-
 /obj/item/grown/attackby(obj/item/O, mob/user, params)
 	..()
 	if (istype(O, /obj/item/plant_analyzer))
-		var/msg = "<span class='info'>*---------*\n This is \a <span class='name'>[src]</span>\n"
-		if(seed)
-			msg += seed.get_analyzer_text()
-		msg += "</span>"
-		to_chat(usr, msg)
+		var/obj/item/plant_analyzer/plant_analyzer = O
+		to_chat(user, plant_analyzer.scan_plant(src))
 		return
 
 /obj/item/grown/proc/add_juice()
@@ -57,5 +53,6 @@
 	return
 
 /obj/item/grown/on_grind()
+	. = ..()
 	for(var/i in 1 to grind_results.len)
 		grind_results[grind_results[i]] = round(seed.potency)

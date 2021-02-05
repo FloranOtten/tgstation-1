@@ -120,7 +120,7 @@ GLOBAL_LIST_INIT(metal_recipes, list ( \
 	singular_name = "metal sheet"
 	icon_state = "sheet-metal"
 	inhand_icon_state = "sheet-metal"
-	custom_materials = list(/datum/material/iron=MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/iron=MINERAL_MATERIAL_AMOUNT)
 	throwforce = 10
 	flags_1 = CONDUCT_1
 	resistance_flags = FIRE_PROOF
@@ -130,6 +130,8 @@ GLOBAL_LIST_INIT(metal_recipes, list ( \
 	tableVariant = /obj/structure/table
 	material_type = /datum/material/iron
 	matter_amount = 4
+	cost = 500
+	source = /datum/robot_energy_storage/metal
 
 /obj/item/stack/sheet/metal/narsie_act()
 	new /obj/item/stack/sheet/runed_metal(loc, amount)
@@ -146,11 +148,6 @@ GLOBAL_LIST_INIT(metal_recipes, list ( \
 
 /obj/item/stack/sheet/metal/five
 	amount = 5
-
-/obj/item/stack/sheet/metal/cyborg
-	custom_materials = null
-	is_cyborg = 1
-	cost = 500
 
 /obj/item/stack/sheet/metal/get_main_recipes()
 	. = ..()
@@ -179,7 +176,8 @@ GLOBAL_LIST_INIT(plasteel_recipes, list ( \
 	desc = "This sheet is an alloy of iron and plasma."
 	icon_state = "sheet-plasteel"
 	inhand_icon_state = "sheet-plasteel"
-	custom_materials = list(/datum/material/iron=MINERAL_MATERIAL_AMOUNT, /datum/material/plasma=MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/alloy/plasteel=MINERAL_MATERIAL_AMOUNT)
+	material_type = /datum/material/alloy/plasteel
 	throwforce = 10
 	flags_1 = CONDUCT_1
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 100, ACID = 80)
@@ -208,7 +206,6 @@ GLOBAL_LIST_INIT(wood_recipes, list ( \
 	new/datum/stack_recipe("wooden sandals", /obj/item/clothing/shoes/sandal, 1), \
 	new/datum/stack_recipe("wood floor tile", /obj/item/stack/tile/wood, 1, 4, 20), \
 	new/datum/stack_recipe("wood table frame", /obj/structure/table_frame/wood, 2, time = 10), \
-	new/datum/stack_recipe("rifle stock", /obj/item/weaponcrafting/stock, 10, time = 40), \
 	new/datum/stack_recipe("rolling pin", /obj/item/kitchen/rollingpin, 2, time = 30), \
 	new/datum/stack_recipe("wooden chair", /obj/structure/chair/wood/, 3, time = 10, one_per_turf = TRUE, on_floor = TRUE), \
 	new/datum/stack_recipe("winged wooden chair", /obj/structure/chair/wood/wings, 3, time = 10, one_per_turf = TRUE, on_floor = TRUE), \
@@ -251,7 +248,7 @@ GLOBAL_LIST_INIT(wood_recipes, list ( \
 	icon_state = "sheet-wood"
 	inhand_icon_state = "sheet-wood"
 	icon = 'icons/obj/stack_objects.dmi'
-	custom_materials = list(/datum/material/wood=MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/wood=MINERAL_MATERIAL_AMOUNT)
 	sheettype = "wood"
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 0)
 	resistance_flags = FLAMMABLE
@@ -284,7 +281,7 @@ GLOBAL_LIST_INIT(bamboo_recipes, list ( \
 	icon_state = "sheet-bamboo"
 	inhand_icon_state = "sheet-bamboo"
 	icon = 'icons/obj/stack_objects.dmi'
-	custom_materials = list(/datum/material/bamboo = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/bamboo = MINERAL_MATERIAL_AMOUNT)
 	throwforce = 15
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0, ENERGY = 0, BOMB = 0, BIO = 0, RAD = 0, FIRE = 50, ACID = 0)
 	resistance_flags = FLAMMABLE
@@ -389,7 +386,7 @@ GLOBAL_LIST_INIT(durathread_recipes, list ( \
 	force = 0
 	throwforce = 0
 	merge_type = /obj/item/stack/sheet/cotton
-	var/pull_effort = 30
+	var/pull_effort = 10
 	var/loom_result = /obj/item/stack/sheet/cloth
 	grind_results = list(/datum/reagent/cellulose = 20)
 
@@ -399,7 +396,6 @@ GLOBAL_LIST_INIT(durathread_recipes, list ( \
 	singular_name = "raw durathread ball"
 	icon_state = "sheet-durathreadraw"
 	merge_type = /obj/item/stack/sheet/cotton/durathread
-	pull_effort = 70
 	loom_result = /obj/item/stack/sheet/durathread
 	grind_results = list()
 
@@ -446,10 +442,15 @@ GLOBAL_LIST_INIT(cardboard_recipes, list (														\
 		new /datum/stack_recipe("syringe box", /obj/item/storage/box/syringes),					\
 		new /datum/stack_recipe("latex gloves box", /obj/item/storage/box/gloves),				\
 		new /datum/stack_recipe("sterile masks box", /obj/item/storage/box/masks),				\
-		new /datum/stack_recipe("body bag box", /obj/item/storage/box/bodybags),					\
+		new /datum/stack_recipe("body bag box", /obj/item/storage/box/bodybags),				\
 		new /datum/stack_recipe("perscription glasses box", /obj/item/storage/box/rxglasses),	\
+		new /datum/stack_recipe("medipen box", /obj/item/storage/box/medipens),					\
+		new /datum/stack_recipe("oxygen tank box", /obj/item/storage/box/emergencytank),	\
+		new /datum/stack_recipe("extended oxygen tank box", /obj/item/storage/box/engitank),	\
 		null,																					\
 
+		new /datum/stack_recipe("survival box", /obj/item/storage/box/survival),				\
+		new /datum/stack_recipe("extended tank survival box", /obj/item/storage/box/survival/engineer),					\
 		new /datum/stack_recipe("disk box", /obj/item/storage/box/disks),						\
 		new /datum/stack_recipe("light tubes box", /obj/item/storage/box/lights/tubes),			\
 		new /datum/stack_recipe("light bulbs box", /obj/item/storage/box/lights/bulbs),			\
@@ -467,7 +468,7 @@ GLOBAL_LIST_INIT(cardboard_recipes, list (														\
 	singular_name = "cardboard sheet"
 	icon_state = "sheet-card"
 	inhand_icon_state = "sheet-card"
-	custom_materials = list(/datum/material/cardboard = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/cardboard = MINERAL_MATERIAL_AMOUNT)
 	resistance_flags = FLAMMABLE
 	force = 0
 	throwforce = 0
@@ -521,7 +522,7 @@ GLOBAL_LIST_INIT(runed_metal_recipes, list ( \
 	icon_state = "sheet-runed"
 	inhand_icon_state = "sheet-runed"
 	icon = 'icons/obj/stack_objects.dmi'
-	custom_materials = list(/datum/material/runedmetal = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/runedmetal = MINERAL_MATERIAL_AMOUNT)
 	sheettype = "runed"
 	merge_type = /obj/item/stack/sheet/runed_metal
 	novariants = TRUE
@@ -577,7 +578,7 @@ GLOBAL_LIST_INIT(bronze_recipes, list ( \
 	icon_state = "sheet-brass"
 	inhand_icon_state = "sheet-brass"
 	icon = 'icons/obj/stack_objects.dmi'
-	custom_materials = list(/datum/material/bronze = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/bronze = MINERAL_MATERIAL_AMOUNT)
 	lefthand_file = 'icons/mob/inhands/misc/sheets_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/misc/sheets_righthand.dmi'
 	resistance_flags = FIRE_PROOF | ACID_PROOF
@@ -597,7 +598,7 @@ GLOBAL_LIST_INIT(bronze_recipes, list ( \
 	. = ..()
 	. += GLOB.bronze_recipes
 
-/obj/item/stack/sheet/paperframes/Initialize()
+/obj/item/stack/sheet/paperframes/Initialize(mapload, new_amount, merge = TRUE, list/mat_override=null, mat_amt=1)
 	. = ..()
 	pixel_x = 0
 	pixel_y = 0
@@ -615,7 +616,7 @@ GLOBAL_LIST_INIT(bronze_recipes, list ( \
 	icon_state = "sheet-lessergem"
 	inhand_icon_state = "sheet-lessergem"
 	novariants = TRUE
-
+	merge_type = /obj/item/stack/sheet/lessergem
 
 /obj/item/stack/sheet/greatergem
 	name = "greater gems"
@@ -624,8 +625,9 @@ GLOBAL_LIST_INIT(bronze_recipes, list ( \
 	icon_state = "sheet-greatergem"
 	inhand_icon_state = "sheet-greatergem"
 	novariants = TRUE
+	merge_type = /obj/item/stack/sheet/greatergem
 
-	/*
+/*
  * Bones
  */
 /obj/item/stack/sheet/bone
@@ -633,7 +635,7 @@ GLOBAL_LIST_INIT(bronze_recipes, list ( \
 	icon = 'icons/obj/mining.dmi'
 	icon_state = "bone"
 	inhand_icon_state = "sheet-bone"
-	custom_materials = list(/datum/material/bone = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/bone = MINERAL_MATERIAL_AMOUNT)
 	singular_name = "bone"
 	desc = "Someone's been drinking their milk."
 	force = 7
@@ -662,7 +664,7 @@ GLOBAL_LIST_INIT(plastic_recipes, list(
 	singular_name = "plastic sheet"
 	icon_state = "sheet-plastic"
 	inhand_icon_state = "sheet-plastic"
-	custom_materials = list(/datum/material/plastic=MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/plastic=MINERAL_MATERIAL_AMOUNT)
 	throwforce = 7
 	material_type = /datum/material/plastic
 	merge_type = /obj/item/stack/sheet/plastic
@@ -687,7 +689,7 @@ new /datum/stack_recipe("paper frame door", /obj/structure/mineral_door/paperfra
 	singular_name = "paper frame"
 	icon_state = "sheet-paper"
 	inhand_icon_state = "sheet-paper"
-	custom_materials = list(/datum/material/paper = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/paper = MINERAL_MATERIAL_AMOUNT)
 	merge_type = /obj/item/stack/sheet/paperframes
 	resistance_flags = FLAMMABLE
 	grind_results = list(/datum/reagent/cellulose = 20)
@@ -703,25 +705,13 @@ new /datum/stack_recipe("paper frame door", /obj/structure/mineral_door/paperfra
 /obj/item/stack/sheet/paperframes/fifty
 	amount = 50
 
-/obj/item/stack/sheet/capitalisium
-	name = "capitalisium sheet"
-	desc = "A source of raw capitalism, capable of bringing forth the prophesized Capitalist Golem."
-	icon_state = "sheet-capitalisium"
-	merge_type = /obj/item/stack/sheet/capitalisium
-
-/obj/item/stack/sheet/stalinium
-	name = "stalinium sheet"
-	desc = "A source of raw socialism, capable of bringing forth the prophesized Soviet Golem."
-	icon_state = "sheet-stalinium"
-	merge_type = /obj/item/stack/sheet/stalinium
-
 /obj/item/stack/sheet/meat
 	name = "meat sheets"
 	desc = "Something's bloody meat compressed into a nice solid sheet."
 	singular_name = "meat sheet"
 	icon_state = "sheet-meat"
 	material_flags = MATERIAL_COLOR
-	custom_materials = list(/datum/material/meat = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/meat = MINERAL_MATERIAL_AMOUNT)
 	merge_type = /obj/item/stack/sheet/meat
 	material_type = /datum/material/meat
 	material_modifier = 1 //None of that wussy stuff
@@ -738,7 +728,7 @@ new /datum/stack_recipe("paper frame door", /obj/structure/mineral_door/paperfra
 	desc = "It's a delicious pepperoni sheetzza!"
 	singular_name = "pepperoni sheetzza"
 	icon_state = "sheet-pizza"
-	custom_materials = list(/datum/material/pizza = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/pizza = MINERAL_MATERIAL_AMOUNT)
 	merge_type = /obj/item/stack/sheet/pizza
 	material_type = /datum/material/pizza
 	material_modifier = 1
@@ -755,7 +745,7 @@ new /datum/stack_recipe("paper frame door", /obj/structure/mineral_door/paperfra
 	desc = "You're too old to be playing with sandcastles. Now you build... sandstations."
 	singular_name = "sand block"
 	icon_state = "sheet-sandstone"
-	custom_materials = list(/datum/material/sand = MINERAL_MATERIAL_AMOUNT)
+	mats_per_unit = list(/datum/material/sand = MINERAL_MATERIAL_AMOUNT)
 	merge_type = /obj/item/stack/sheet/sandblock
 	material_type = /datum/material/sand
 	material_modifier = 1
@@ -765,4 +755,23 @@ new /datum/stack_recipe("paper frame door", /obj/structure/mineral_door/paperfra
 /obj/item/stack/sheet/sandblock/twenty
 	amount = 20
 /obj/item/stack/sheet/sandblock/five
+	amount = 5
+
+
+/obj/item/stack/sheet/hauntium
+	name = "haunted sheets"
+	desc = "These sheets seem cursed."
+	singular_name = "haunted sheet"
+	icon_state = "sheet-meat"
+	material_flags = MATERIAL_COLOR
+	mats_per_unit = list(/datum/material/hauntium = MINERAL_MATERIAL_AMOUNT)
+	merge_type = /obj/item/stack/sheet/hauntium
+	material_type = /datum/material/hauntium
+	material_modifier = 1 //None of that wussy stuff
+
+/obj/item/stack/sheet/hauntium/fifty
+	amount = 50
+/obj/item/stack/sheet/hauntium/twenty
+	amount = 20
+/obj/item/stack/sheet/hauntium/five
 	amount = 5

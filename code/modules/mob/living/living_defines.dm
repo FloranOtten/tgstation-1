@@ -12,8 +12,10 @@
 	var/lastattackerckey = null
 
 	//Health and life related vars
-	var/maxHealth = 100 ///Maximum health that should be possible.
-	var/health = 100 	///A mob's health
+	/// Maximum health that should be possible.
+	var/maxHealth = MAX_LIVING_HEALTH
+	/// The mob's current health.
+	var/health = MAX_LIVING_HEALTH
 
 	//Damage related vars, NOTE: THESE SHOULD ONLY BE MODIFIED BY PROCS
 	var/bruteloss = 0	///Brutal damage caused by brute force (punching, being clubbed by a toolbox ect... this also accounts for pressure damage)
@@ -26,12 +28,26 @@
 	///When the mob enters hard critical state and is fully incapacitated.
 	var/hardcrit_threshold = HEALTH_THRESHOLD_FULLCRIT
 
+	//Damage dealing vars! These are meaningless outside of specific instances where it's checked and defined.
+	// Lower bound of damage done by unarmed melee attacks. Mob code is a mess, only works where this is checked for.
+	var/melee_damage_lower = 0
+	// Upper bound of damage done by unarmed melee attacks. Please ensure you check the xyz_defenses.dm for the mobs in question to see if it uses this or hardcoded values.
+	var/melee_damage_upper = 0
+
+	/// Generic bitflags for boolean conditions at the [/mob/living] level. Keep this for inherent traits of living types, instead of runtime-changeable ones.
+	var/living_flags = NONE
+
+	/// Flags that determine the potential of a mob to perform certain actions. Do not change this directly.
 	var/mobility_flags = MOBILITY_FLAGS_DEFAULT
 
 	var/resting = FALSE
 
-	VAR_PROTECTED/lying_angle = 0			///number of degrees. DO NOT USE THIS IN CHECKS. CHECK FOR MOBILITY FLAGS INSTEAD!!
-	var/lying_prev = 0		///last value of lying on update_mobility
+	/// Variable to track the body position of a mob, regardgless of the actual angle of rotation (usually matching it, but not necessarily).
+	var/body_position = STANDING_UP
+	/// Number of degrees of rotation of a mob. 0 means no rotation, up-side facing NORTH. 90 means up-side rotated to face EAST, and so on.
+	VAR_PROTECTED/lying_angle = 0
+	/// Value of lying lying_angle before last change. TODO: Remove the need for this.
+	var/lying_prev = 0
 
 	var/hallucination = 0 ///Directly affects how long a mob will hallucinate for
 
@@ -90,7 +106,7 @@
 	var/health_doll_icon ///if this exists AND the normal sprite is bigger than 32x32, this is the replacement icon state (because health doll size limitations). the icon will always be screen_gen.dmi
 
 	var/last_bumped = 0
-	var/unique_name = 0 ///if a mob's name should be appended with an id when created e.g. Mob (666)
+	var/unique_name = FALSE ///if a mob's name should be appended with an id when created e.g. Mob (666)
 	var/numba = 0 ///the id a mob gets when it's created
 
 	var/list/butcher_results = null ///these will be yielded from butchering with a probability chance equal to the butcher item's effectiveness
@@ -117,8 +133,6 @@
 
 	var/list/implants = null
 
-	var/datum/riding/riding_datum
-
 	var/last_words	///used for database logging
 
 	var/list/obj/effect/proc_holder/abilities = list()
@@ -144,3 +158,14 @@
 	var/icon/held_rh = 'icons/mob/pets_held_rh.dmi'
 	var/icon/head_icon = 'icons/mob/pets_held.dmi'//what it looks like on your head
 	var/held_state = ""//icon state for the above
+
+	///If combat mode is on or not
+	var/combat_mode = FALSE
+
+	/// Is this mob allowed to be buckled/unbuckled to/from things?
+	var/can_buckle_to = TRUE
+
+	///The y amount a mob's sprite should be offset due to the current position they're in (e.g. lying down moves your sprite down)
+	var/body_position_pixel_x_offset = 0
+	///The x amount a mob's sprite should be offset due to the current position they're in
+	var/body_position_pixel_y_offset = 0

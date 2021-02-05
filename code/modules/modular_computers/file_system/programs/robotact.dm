@@ -12,6 +12,7 @@
 	usage_flags = PROGRAM_TABLET
 	size = 5
 	tgui_id = "NtosRobotact"
+	program_icon = "terminal"
 	///A typed reference to the computer, specifying the borg tablet type
 	var/obj/item/modular_computer/tablet/integrated/tablet
 
@@ -38,7 +39,7 @@
 	var/mob/living/silicon/robot/borgo = tablet.borgo
 
 	data["name"] = borgo.name
-	data["designation"] = borgo.designation //Borgo module type
+	data["designation"] = borgo.model //Borgo model type
 	data["masterAI"] = borgo.connected_ai //Master AI
 
 	var/charge = 0
@@ -51,7 +52,7 @@
 	data["integrity"] = ((borgo.health + 100) / 2) //Borgo health, as percentage
 	data["lampIntensity"] = borgo.lamp_intensity //Borgo lamp power setting
 	data["sensors"] = "[borgo.sensors_on?"ACTIVE":"DISABLED"]"
-	data["printerPictures"] = borgo.aicamera.stored.len //Number of pictures taken
+	data["printerPictures"] =  borgo.connected_ai? borgo.connected_ai.aicamera.stored.len : borgo.aicamera.stored.len //Number of pictures taken, synced to AI if available
 	data["printerToner"] = borgo.toner //amount of toner
 	data["printerTonerMax"] = borgo.tonermax //It's a variable, might as well use it
 	data["thrustersInstalled"] = borgo.ionpulse //If we have a thruster uprade
@@ -61,8 +62,8 @@
 	data["cover"] = "[borgo.locked? "LOCKED":"UNLOCKED"]"
 	//Ability to move. FAULT if lockdown wire is cut, DISABLED if borg locked, ENABLED otherwise
 	data["locomotion"] = "[borgo.wires.is_cut(WIRE_LOCKDOWN)?"FAULT":"[borgo.lockcharge?"DISABLED":"ENABLED"]"]"
-	//Module wire. FAULT if cut, NOMINAL otherwise
-	data["wireModule"] = "[borgo.wires.is_cut(WIRE_RESET_MODULE)?"FAULT":"NOMINAL"]"
+	//Model wire. FAULT if cut, NOMINAL otherwise
+	data["wireModule"] = "[borgo.wires.is_cut(WIRE_RESET_MODEL)?"FAULT":"NOMINAL"]"
 	//DEBUG -- Camera(net) wire. FAULT if cut (or no cameranet camera), DISABLED if pulse-disabled, NOMINAL otherwise
 	data["wireCamera"] = "[!borgo.builtInCamera || borgo.wires.is_cut(WIRE_CAMERA)?"FAULT":"[borgo.builtInCamera.can_use()?"NOMINAL":"DISABLED"]"]"
 	//AI wire. FAULT if wire is cut, CONNECTED if connected to AI, READY otherwise
@@ -117,7 +118,10 @@
 			borgo.toggle_sensors()
 
 		if("viewImage")
-			borgo.aicamera?.viewpictures(usr)
+			if(borgo.connected_ai)
+				borgo.connected_ai.aicamera?.viewpictures(usr)
+			else
+				borgo.aicamera?.viewpictures(usr)
 
 		if("printImage")
 			var/obj/item/camera/siliconcam/robot_camera/borgcam = borgo.aicamera
@@ -131,11 +135,11 @@
 			borgo.toggle_headlamp(FALSE, TRUE)
 
 /**
-  * Forces a full update of the UI, if currently open.
-  *
-  * Forces an update that includes refreshing ui_static_data. Called by
-  * law changes and borg log additions.
-  */
+ * Forces a full update of the UI, if currently open.
+ *
+ * Forces an update that includes refreshing ui_static_data. Called by
+ * law changes and borg log additions.
+ */
 /datum/computer_file/program/robotact/proc/force_full_update()
 	if(tablet)
 		var/datum/tgui/active_ui = SStgui.get_open_ui(tablet.borgo, src)
