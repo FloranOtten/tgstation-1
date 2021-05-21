@@ -15,7 +15,7 @@
 
 /obj/structure/frame/deconstruct(disassembled = TRUE)
 	if(!(flags_1 & NODECONSTRUCT_1))
-		new /obj/item/stack/sheet/metal(loc, 5)
+		new /obj/item/stack/sheet/iron(loc, 5)
 		if(circuit)
 			circuit.forceMove(loc)
 			circuit = null
@@ -97,11 +97,15 @@
 				if(P.use_tool(src, user, 40, volume=50))
 					if(state == 1)
 						to_chat(user, "<span class='notice'>You disassemble the frame.</span>")
-						var/obj/item/stack/sheet/metal/M = new (loc, 5)
+						var/obj/item/stack/sheet/iron/M = new (loc, 5)
 						M.add_fingerprint(user)
 						qdel(src)
 				return
 			if(P.tool_behaviour == TOOL_WRENCH)
+				var/turf/ground = get_turf(src)
+				if(!anchored && ground.is_blocked_turf(exclude_mobs = TRUE, source_atom = src))
+					to_chat(user, "<span class='notice'>You fail to secure [src].</span>")
+					return
 				to_chat(user, "<span class='notice'>You start [anchored ? "un" : ""]securing [src]...</span>")
 				if(P.use_tool(src, user, 40, volume=75))
 					if(state == 1)

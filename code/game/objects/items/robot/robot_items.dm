@@ -56,13 +56,13 @@
 			mode = 0
 	switch(mode)
 		if(0)
-			to_chat(user, "Power reset. Hugs!")
+			to_chat(user, "<span class='infoplain'>Power reset. Hugs!</span>")
 		if(1)
-			to_chat(user, "Power increased!")
+			to_chat(user, "<span class='infoplain'>Power increased!</span>")
 		if(2)
-			to_chat(user, "BZZT. Electrifying arms...")
+			to_chat(user, "<span class='warningplain'>BZZT. Electrifying arms...</span>")
 		if(3)
-			to_chat(user, "ERROR: ARM ACTUATORS OVERLOADED.")
+			to_chat(user, "<span class='warningplain'>ERROR: ARM ACTUATORS OVERLOADED.</span>")
 
 /obj/item/borg/cyborghug/attack(mob/living/M, mob/living/silicon/robot/user, params)
 	if(M == user)
@@ -72,7 +72,8 @@
 			if(M.health >= 0)
 				if(isanimal(M))
 					var/list/modifiers = params2list(params)
-					M.attack_hand(user, modifiers) //This enables borgs to get the floating heart icon and mob emote from simple_animal's that have petbonus == true.
+					if (!user.combat_mode && !LAZYACCESS(modifiers, RIGHT_CLICK))
+						M.attack_hand(user, modifiers) //This enables borgs to get the floating heart icon and mob emote from simple_animal's that have petbonus == true.
 					return
 				if(user.zone_selected == BODY_ZONE_HEAD)
 					user.visible_message("<span class='notice'>[user] playfully boops [M] on the head!</span>", \
@@ -159,6 +160,7 @@
 
 /obj/item/borg/charger/update_icon_state()
 	icon_state = "charger_[mode]"
+	return ..()
 
 /obj/item/borg/charger/attack_self(mob/user)
 	if(mode == "draw")
@@ -166,7 +168,7 @@
 	else
 		mode = "draw"
 	to_chat(user, "<span class='notice'>You toggle [src] to \"[mode]\" mode.</span>")
-	update_icon()
+	update_appearance()
 
 /obj/item/borg/charger/afterattack(obj/item/target, mob/living/silicon/robot/user, proximity_flag)
 	. = ..()
@@ -229,7 +231,7 @@
 					break
 				if(!user.cell.give(draw))
 					break
-				target.update_icon()
+				target.update_appearance()
 
 			to_chat(user, "<span class='notice'>You stop charging yourself.</span>")
 
@@ -267,7 +269,7 @@
 				break
 			if(!cell.give(draw))
 				break
-			target.update_icon()
+			target.update_appearance()
 
 		to_chat(user, "<span class='notice'>You stop charging [target].</span>")
 
@@ -344,9 +346,9 @@
 	name = "treat fabricator"
 	desc = "Reward humans with various treats. Toggle in-module to switch between dispensing and high velocity ejection modes."
 	icon_state = "lollipop"
-	var/candy = 30
-	var/candymax = 30
-	var/charge_delay = 10
+	var/candy = 5
+	var/candymax = 5
+	var/charge_delay = 10 SECONDS
 	var/charging = FALSE
 	var/mode = DISPENSE_LOLLIPOP_MODE
 
@@ -363,10 +365,8 @@
 	. = ..()
 	check_amount()
 
-/obj/item/borg/lollipop/proc/check_amount()	//Doesn't even use processing ticks.
-	if(charging)
-		return
-	if(candy < candymax)
+/obj/item/borg/lollipop/proc/check_amount() //Doesn't even use processing ticks.
+	if(!charging && candy < candymax)
 		addtimer(CALLBACK(src, .proc/charge_lollipops), charge_delay)
 		charging = TRUE
 
@@ -390,12 +390,10 @@
 	var/obj/item/food_item
 	switch(mode)
 		if(DISPENSE_LOLLIPOP_MODE)
-			food_item = new /obj/item/food/chewable/lollipop(T)
+			food_item = new /obj/item/food/lollipop(T)
 		if(DISPENSE_ICECREAM_MODE)
-			food_item = new /obj/item/food/icecream(T)
-			var/obj/item/food/icecream/I = food_item
-			I.add_ice_cream("vanilla")
-			I.desc = "Eat the ice cream."
+			food_item = new /obj/item/food/icecream(T, list(ICE_CREAM_VANILLA))
+			food_item.desc = "Eat the ice cream."
 
 	var/into_hands = FALSE
 	if(ismob(A))
@@ -431,7 +429,7 @@
 	user.visible_message("<span class='warning'>[user] blasts a flying lollipop at [target]!</span>")
 	check_amount()
 
-/obj/item/borg/lollipop/proc/shootG(atom/target, mob/living/user, params)	//Most certainly a good idea.
+/obj/item/borg/lollipop/proc/shootG(atom/target, mob/living/user, params) //Most certainly a good idea.
 	if(candy <= 0)
 		to_chat(user, "<span class='warning'>Not enough gumballs left!</span>")
 		return FALSE
@@ -443,7 +441,7 @@
 	else
 		A = new /obj/item/ammo_casing/caseless/gumball(src)
 
-	A.BB.color = rgb(rand(0, 255), rand(0, 255), rand(0, 255))
+	A.loaded_projectile.color = rgb(rand(0, 255), rand(0, 255), rand(0, 255))
 	playsound(src.loc, 'sound/weapons/bulletflyby3.ogg', 50, TRUE)
 	A.fire_casing(target, user, params, 0, 0, null, 0, src)
 	user.visible_message("<span class='warning'>[user] shoots a high-velocity gumball at [target]!</span>")
@@ -501,24 +499,23 @@
 	name = "gumball"
 	desc = "Oh noes! A fast-moving gumball!"
 	icon_state = "gumball"
-	ammo_type = /obj/item/food/chewable/gumball/cyborg
+	ammo_type = /obj/item/food/gumball
 	nodamage = TRUE
 	damage = 0
 	speed = 0.5
 
 /obj/projectile/bullet/reusable/gumball/harmful
-	ammo_type = /obj/item/food/chewable/gumball/cyborg
 	nodamage = FALSE
-	damage = 3
+	damage = 10 //mediborgs get 5 shots before needing to reload at a rate of 1 shot/10 seconds, so they can do 50 damage from range max before needing to close the distance or retreat
 
 /obj/projectile/bullet/reusable/gumball/handle_drop()
 	if(!dropped)
 		var/turf/T = get_turf(src)
-		var/obj/item/food/chewable/gumball/S = new ammo_type(T)
+		var/obj/item/food/gumball/S = new ammo_type(T)
 		S.color = color
 		dropped = TRUE
 
-/obj/item/ammo_casing/caseless/lollipop	//NEEDS RANDOMIZED COLOR LOGIC.
+/obj/item/ammo_casing/caseless/lollipop //NEEDS RANDOMIZED COLOR LOGIC.
 	name = "Lollipop"
 	desc = "Why are you seeing this?!"
 	projectile_type = /obj/projectile/bullet/reusable/lollipop
@@ -532,7 +529,7 @@
 	name = "lollipop"
 	desc = "Oh noes! A fast-moving lollipop!"
 	icon_state = "lollipop_1"
-	ammo_type = /obj/item/food/chewable/lollipop/cyborg
+	ammo_type = /obj/item/food/lollipop/cyborg
 	nodamage = TRUE
 	damage = 0
 	speed = 0.5
@@ -540,22 +537,22 @@
 
 /obj/projectile/bullet/reusable/lollipop/harmful
 	embedding = list(embed_chance=35, fall_chance=2, jostle_chance=0, ignore_throwspeed_threshold=TRUE, pain_stam_pct=0.5, pain_mult=3, rip_time=10)
-	damage = 3
+	damage = 10
 	nodamage = FALSE
 	embed_falloff_tile = 0
 
 /obj/projectile/bullet/reusable/lollipop/Initialize()
 	. = ..()
-	var/obj/item/food/chewable/lollipop/S = new ammo_type(src)
+	var/obj/item/food/lollipop/S = new ammo_type(src)
 	color2 = S.headcolor
-	var/mutable_appearance/head = mutable_appearance('icons/obj/projectiles.dmi', "lollipop_2")
+	var/mutable_appearance/head = mutable_appearance('icons/obj/guns/projectiles.dmi', "lollipop_2")
 	head.color = color2
 	add_overlay(head)
 
 /obj/projectile/bullet/reusable/lollipop/handle_drop()
 	if(!dropped)
 		var/turf/T = get_turf(src)
-		var/obj/item/food/chewable/lollipop/S = new ammo_type(T)
+		var/obj/item/food/lollipop/S = new ammo_type(T)
 		S.change_head_color(color2)
 		dropped = TRUE
 
@@ -590,7 +587,7 @@
 	var/projectile_damage_coefficient = 0.5
 	/// Energy cost per tracked projectile damage amount per second
 	var/projectile_damage_tick_ecost_coefficient = 10
-	var/projectile_speed_coefficient = 1.5		//Higher the coefficient slower the projectile.
+	var/projectile_speed_coefficient = 1.5 //Higher the coefficient slower the projectile.
 	/// Energy cost per tracked projectile per second
 	var/projectile_tick_speed_ecost = 75
 	var/list/obj/projectile/tracked
@@ -634,11 +631,12 @@
 			to_chat(user, "<span class='warning'>[src]'s safety cutoff prevents you from activating it due to living beings being ontop of you!</span>")
 	else
 		deactivate_field()
-	update_icon()
+	update_appearance()
 	to_chat(user, "<span class='boldnotice'>You [active? "activate":"deactivate"] [src].</span>")
 
 /obj/item/borg/projectile_dampen/update_icon_state()
 	icon_state = "[initial(icon_state)][active]"
+	return ..()
 
 /obj/item/borg/projectile_dampen/proc/activate_field()
 	if(istype(dampening_field))
@@ -693,7 +691,7 @@
 	var/usage = 0
 	for(var/I in tracked)
 		var/obj/projectile/P = I
-		if(!P.stun && P.nodamage)	//No damage
+		if(!P.stun && P.nodamage) //No damage
 			continue
 		usage += projectile_tick_speed_ecost * delta_time
 		usage += tracked[I] * projectile_damage_tick_ecost_coefficient * delta_time
@@ -798,8 +796,7 @@
 	RegisterSignal(loc.loc, COMSIG_BORG_SAFE_DECONSTRUCT, .proc/safedecon)
 
 /obj/item/borg/apparatus/Destroy()
-	if(stored)
-		qdel(stored)
+	QDEL_NULL(stored)
 	. = ..()
 
 ///If we're safely deconstructed, we put the item neatly onto the ground, rather than deleting it.
@@ -810,9 +807,9 @@
 
 /obj/item/borg/apparatus/Exited(atom/A)
 	if(A == stored) //sanity check
-		UnregisterSignal(stored, COMSIG_ATOM_UPDATE_ICON)
+		UnregisterSignal(stored, COMSIG_ATOM_UPDATED_ICON)
 		stored = null
-	update_icon()
+	update_appearance()
 	. = ..()
 
 ///A right-click verb, for those not using hotkey mode.
@@ -825,13 +822,19 @@
 	stored.forceMove(get_turf(usr))
 	return
 
+/**
+* Attack_self will pass for the stored item.
+*/
 /obj/item/borg/apparatus/attack_self(mob/living/silicon/robot/user)
-	if(!stored)
+	if(!stored || !issilicon(user))
 		return ..()
-	if(user.client?.keys_held["Alt"])
-		stored.forceMove(get_turf(user))
-		return
 	stored.attack_self(user)
+
+//Alt click drops the stored item.
+/obj/item/borg/apparatus/AltClick(mob/living/silicon/robot/user)
+	if(!stored || !issilicon(user))
+		return ..()
+	stored.forceMove(user.drop_location())
 
 /obj/item/borg/apparatus/pre_attack(atom/A, mob/living/user, params)
 	if(!stored)
@@ -844,13 +847,24 @@
 			var/obj/item/O = A
 			O.forceMove(src)
 			stored = O
-			RegisterSignal(stored, COMSIG_ATOM_UPDATE_ICON, /atom/.proc/update_icon)
-			update_icon()
+			RegisterSignal(stored, COMSIG_ATOM_UPDATED_ICON, .proc/on_stored_updated_icon)
+			update_appearance()
 			return
 	else
 		stored.melee_attack_chain(user, A, params)
 		return
 	. = ..()
+
+/**
+ * Updates the appearance of the apparatus when the stored object's icon gets updated.
+ *
+ * Returns NONE as we have not done anything to the stored object itself,
+ * which is where this signal that this handler intercepts is sent from.
+ */
+/obj/item/borg/apparatus/proc/on_stored_updated_icon(datum/source, updates)
+	SIGNAL_HANDLER
+	update_appearance()
+	return NONE
 
 /obj/item/borg/apparatus/attackby(obj/item/W, mob/user, params)
 	if(stored)
@@ -864,7 +878,7 @@
 
 /obj/item/borg/apparatus/beaker
 	name = "beaker storage apparatus"
-	desc = "A special apparatus for carrying beakers without spilling the contents. Alt-Z or right-click to drop the beaker."
+	desc = "A special apparatus for carrying beakers without spilling the contents."
 	icon_state = "borg_beaker_apparatus"
 	storable = list(/obj/item/reagent_containers/glass/beaker,
 					/obj/item/reagent_containers/glass/bottle)
@@ -872,14 +886,14 @@
 /obj/item/borg/apparatus/beaker/Initialize()
 	. = ..()
 	stored = new /obj/item/reagent_containers/glass/beaker/large(src)
-	RegisterSignal(stored, COMSIG_ATOM_UPDATE_ICON, /atom/.proc/update_icon)
-	update_icon()
+	RegisterSignal(stored, COMSIG_ATOM_UPDATED_ICON, .proc/on_stored_updated_icon)
+	update_appearance()
 
 /obj/item/borg/apparatus/beaker/Destroy()
 	if(stored)
 		var/obj/item/reagent_containers/C = stored
 		C.SplashReagents(get_turf(src))
-		qdel(stored)
+	QDEL_NULL(stored)
 	. = ..()
 
 /obj/item/borg/apparatus/beaker/examine()
@@ -892,6 +906,9 @@
 				. += "[R.volume] units of [R.name]"
 		else
 			. += "Nothing."
+
+		. += "<span class='notice'> <i>Right-clicking</i> will splash the beaker on the ground.</span>"
+	. += "<span class='notice'> <i>Alt-click</i> will drop the currently stored beaker. </span>"
 
 /obj/item/borg/apparatus/beaker/update_overlays()
 	. = ..()
@@ -910,12 +927,11 @@
 		arm.pixel_y = arm.pixel_y - 5
 	. += arm
 
-/obj/item/borg/apparatus/beaker/attack_self(mob/living/silicon/robot/user)
-	if(stored && !user.client?.keys_held["Alt"] && user.combat_mode)
-		var/obj/item/reagent_containers/C = stored
-		C.SplashReagents(get_turf(user))
-		loc.visible_message("<span class='notice'>[user] spills the contents of the [C] all over the floor.</span>")
-		return
+/// Secondary attack spills the content of the beaker.
+/obj/item/borg/apparatus/beaker/pre_attack_secondary(atom/target, mob/living/silicon/robot/user)
+	var/obj/item/reagent_containers/stored_beaker = stored
+	stored_beaker.SplashReagents(drop_location(user))
+	loc.visible_message("<span class='notice'>[user] spills the contents of [stored_beaker] all over the ground.</span>")
 	. = ..()
 
 /obj/item/borg/apparatus/beaker/extra
@@ -924,7 +940,7 @@
 
 /obj/item/borg/apparatus/beaker/service
 	name = "beverage storage apparatus"
-	desc = "A special apparatus for carrying drinks without spilling the contents. Alt-Z or right-click to drop the beaker."
+	desc = "A special apparatus for carrying drinks without spilling the contents. Will resynthesize any drinks you pour out!"
 	icon_state = "borg_beaker_apparatus"
 	storable = list(/obj/item/reagent_containers/food/drinks,
 					/obj/item/reagent_containers/food/condiment)
@@ -932,8 +948,8 @@
 /obj/item/borg/apparatus/beaker/service/Initialize()
 	. = ..()
 	stored = new /obj/item/reagent_containers/food/drinks/drinkingglass(src)
-	RegisterSignal(stored, COMSIG_ATOM_UPDATE_ICON, /atom/.proc/update_icon)
-	update_icon()
+	RegisterSignal(stored, COMSIG_ATOM_UPDATED_ICON, .proc/on_stored_updated_icon)
+	update_appearance()
 
 /////////////////////
 //organ storage bag//
@@ -956,6 +972,7 @@
 		. += organ.name
 	else
 		. += "Nothing."
+	. += "<span class='notice'> <i>Alt-click</i> will drop the currently stored organ. </span>"
 
 /obj/item/borg/apparatus/organ_storage/update_overlays()
 	. = ..()
@@ -974,7 +991,8 @@
 		bag = mutable_appearance(icon, icon_state = "evidenceobj") // empty bag
 	. += bag
 
-/obj/item/borg/apparatus/organ_storage/attack_self(mob/user)
+/obj/item/borg/apparatus/organ_storage/AltClick(mob/living/silicon/robot/user)
+	. = ..()
 	if(stored)
 		var/obj/item/organ = stored
 		user.visible_message("<span class='notice'>[user] dumps [organ] from [src].</span>", "<span class='notice'>You dump [organ] from [src].</span>")
@@ -990,14 +1008,14 @@
 
 /obj/item/borg/apparatus/circuit
 	name = "circuit manipulation apparatus"
-	desc = "A special apparatus for carrying and manipulating circuit boards. Alt-Z or right-click to drop the stored object."
+	desc = "A special apparatus for carrying and manipulating circuit boards."
 	icon_state = "borg_hardware_apparatus"
 	storable = list(/obj/item/circuitboard,
 				/obj/item/electronics)
 
 /obj/item/borg/apparatus/circuit/Initialize()
 	. = ..()
-	update_icon()
+	update_appearance()
 
 /obj/item/borg/apparatus/circuit/update_overlays()
 	. = ..()
@@ -1018,6 +1036,7 @@
 	. = ..()
 	if(stored)
 		. += "The apparatus currently has [stored] secured."
+	. += "<span class='notice'> <i>Alt-click</i> will drop the currently stored circuit. </span>"
 
 /obj/item/borg/apparatus/circuit/pre_attack(atom/A, mob/living/user, params)
 	. = ..()

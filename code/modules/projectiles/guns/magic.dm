@@ -9,6 +9,8 @@
 	fire_sound = 'sound/weapons/emitter.ogg'
 	flags_1 =  CONDUCT_1
 	w_class = WEIGHT_CLASS_HUGE
+	///what kind of magic is this
+	var/school = SCHOOL_EVOCATION
 	var/checks_antimagic = TRUE
 	var/max_charges = 6
 	var/charges = 0
@@ -40,11 +42,11 @@
 	return charges
 
 /obj/item/gun/magic/recharge_newshot()
-	if (charges && chambered && !chambered.BB)
+	if (charges && chambered && !chambered.loaded_projectile)
 		chambered.newshot()
 
 /obj/item/gun/magic/process_chamber()
-	if(chambered && !chambered.BB) //if BB is null, i.e the shot has been fired...
+	if(chambered && !chambered.loaded_projectile) //if BB is null, i.e the shot has been fired...
 		charges--//... drain a charge
 		recharge_newshot()
 
@@ -94,4 +96,4 @@
 /obj/item/gun/magic/proc/instant_recharge()
 	charges = max_charges
 	recharge_newshot()
-	update_icon()
+	update_appearance()

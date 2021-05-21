@@ -19,6 +19,7 @@
 #define COMSIG_KB_CARBON_HOLDRUNMOVEINTENT_DOWN "keybinding_carbon_holdrunmoveintent_down"
 #define COMSIG_KB_CARBON_HOLDRUNMOVEINTENT_UP "keybinding_carbon_holdrunmoveintent_up"
 #define COMSIG_KB_CARBON_TOGGLETHROWMODE_DOWN "keybinding_carbon_togglethrowmode_down"
+#define COMSIG_KB_CARBON_HOLDTHROWMODE_DOWN "keybinding_carbon_holdthrowmode_down"
 #define COMSIG_KB_CARBON_GIVEITEM_DOWN "keybinding_carbon_giveitem_down"
 
 //Client
@@ -43,6 +44,8 @@
 #define COMSIG_KB_LIVING_LOOKDOWN_DOWN "keybinding_living_lookdown_down"
 #define COMSIG_KB_LIVING_REST_DOWN "keybinding_living_rest_down"
 #define COMSIG_KB_LIVING_TOGGLE_COMBAT_DOWN "keybinding_living_toggle_combat_down"
+#define COMSIG_KB_LIVING_ENABLE_COMBAT_DOWN "keybinding_living_enable_combat_down"
+#define COMSIG_KB_LIVING_DISABLE_COMBAT_DOWN "keybinding_living_disable_combat_down"
 
 //Mob
 #define COMSIG_KB_MOB_FACENORTH_DOWN "keybinding_mob_facenorth_down"
@@ -72,7 +75,6 @@
 #define COMSIG_KB_SILICON_TOGGLEMODULEONE_DOWN "keybinding_silicon_togglemoduleone_down"
 #define COMSIG_KB_SILICON_TOGGLEMODULETWO_DOWN "keybinding_silicon_togglemoduletwo_down"
 #define COMSIG_KB_SILICON_TOGGLEMODULETHREE_DOWN "keybinding_silicon_togglemodulethree_down"
-#define COMSIG_KB_SILICON_CYCLEINTENT_DOWN "keybinding_silicon_cycleintent_down"
 #define COMSIG_KB_SILICON_UNEQUIPMODULE_DOWN "keybinding_silicon_unequipmodule_down"
 
 //Movement
@@ -80,4 +82,5 @@
 #define COMSIG_KB_MOVEMENT_SOUTH_DOWN "keybinding_movement_south_down"
 #define COMSIG_KB_MOVEMENT_WEST_DOWN "keybinding_movement_west_down"
 #define COMSIG_KB_MOVEMENT_EAST_DOWN "keybinding_movement_east_down"
-
+#define COMSIG_KB_MOVEMENT_ZLEVEL_MOVEUP_DOWN "keybinding_mob_zlevel_moveup_down"
+#define COMSIG_KB_MOVEMENT_ZLEVEL_MOVEDOWN_DOWN "keybinding_mob_zlevel_movedown_down"

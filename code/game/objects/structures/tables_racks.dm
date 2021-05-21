@@ -1,11 +1,11 @@
 /* Tables and Racks
  * Contains:
- *		Tables
- *		Glass Tables
- *		Wooden Tables
- *		Reinforced Tables
- *		Racks
- *		Rack Parts
+ * Tables
+ * Glass Tables
+ * Wooden Tables
+ * Reinforced Tables
+ * Racks
+ * Rack Parts
  */
 
 /*
@@ -14,7 +14,7 @@
 
 /obj/structure/table
 	name = "table"
-	desc = "A square piece of metal standing on four metal legs. It can not move."
+	desc = "A square piece of iron standing on four metal legs. It can not move."
 	icon = 'icons/obj/smooth_structures/table.dmi'
 	icon_state = "table-0"
 	base_icon_state = "table"
@@ -24,7 +24,7 @@
 	layer = TABLE_LAYER
 	var/frame = /obj/structure/table_frame
 	var/framestack = /obj/item/stack/rods
-	var/buildstack = /obj/item/stack/sheet/metal
+	var/buildstack = /obj/item/stack/sheet/iron
 	var/busy = FALSE
 	var/buildstackamount = 1
 	var/framestackamount = 2
@@ -50,6 +50,7 @@
 	return "<span class='notice'>The top is <b>screwed</b> on, but the main <b>bolts</b> are also visible.</span>"
 
 /obj/structure/table/update_icon()
+	. = ..()
 	if(smoothing_flags & (SMOOTH_CORNERS|SMOOTH_BITMASK))
 		QUEUE_SMOOTH(src)
 		QUEUE_SMOOTH_NEIGHBORS(src)
@@ -59,10 +60,10 @@
 	qdel(src)
 	new /obj/structure/table/wood(A)
 
-/obj/structure/table/attack_paw(mob/user)
-	return attack_hand(user)
+/obj/structure/table/attack_paw(mob/user, list/modifiers)
+	return attack_hand(user, modifiers)
 
-/obj/structure/table/attack_hand(mob/living/user)
+/obj/structure/table/attack_hand(mob/living/user, list/modifiers)
 	if(Adjacent(user) && user.pulling)
 		if(isliving(user.pulling))
 			var/mob/living/pushed_mob = user.pulling
@@ -81,7 +82,7 @@
 			else
 				pushed_mob.visible_message("<span class='notice'>[user] begins to place [pushed_mob] onto [src]...</span>", \
 									"<span class='userdanger'>[user] begins to place [pushed_mob] onto [src]...</span>")
-				if(do_after(user, 35, target = pushed_mob))
+				if(do_after(user, 3.5 SECONDS, target = pushed_mob))
 					tableplace(user, pushed_mob)
 				else
 					return
@@ -108,11 +109,10 @@
 	if(locate(/obj/structure/table) in get_turf(mover))
 		return TRUE
 
-/obj/structure/table/CanAStarPass(ID, dir, caller)
+/obj/structure/table/CanAStarPass(obj/item/card/id/ID, to_dir, atom/movable/caller)
 	. = !density
-	if(ismovable(caller))
-		var/atom/movable/mover = caller
-		. = . || (mover.pass_flags & PASSTABLE)
+	if(istype(caller))
+		. = . || (caller.pass_flags & PASSTABLE)
 
 /obj/structure/table/proc/tableplace(mob/living/user, mob/living/pushed_mob)
 	pushed_mob.forceMove(loc)
@@ -126,7 +126,7 @@
 		to_chat(user, "<span class='danger'>Throwing [pushed_mob] onto the table might hurt them!</span>")
 		return
 	var/added_passtable = FALSE
-	if(!pushed_mob.pass_flags & PASSTABLE)
+	if(!(pushed_mob.pass_flags & PASSTABLE))
 		added_passtable = TRUE
 		pushed_mob.pass_flags |= PASSTABLE
 	pushed_mob.Move(src.loc)
@@ -164,7 +164,7 @@
 
 /obj/structure/table/attackby(obj/item/I, mob/living/user, params)
 	var/list/modifiers = params2list(params)
-	if(!(flags_1 & NODECONSTRUCT_1) && modifiers && modifiers["right"])
+	if(!(flags_1 & NODECONSTRUCT_1) && LAZYACCESS(modifiers, RIGHT_CLICK))
 		if(I.tool_behaviour == TOOL_SCREWDRIVER && deconstruction_ready)
 			to_chat(user, "<span class='notice'>You start disassembling [src]...</span>")
 			if(I.use_tool(src, user, 20, volume=50))
@@ -210,18 +210,17 @@
 				"<span class='userdanger'>[user] begins to[skills_space] place [carried_mob] onto [src]...</span>")
 			if(do_after(user, tableplace_delay, target = carried_mob))
 				user.unbuckle_mob(carried_mob)
-				tablepush(user, carried_mob)
+				tableplace(user, carried_mob)
 		return TRUE
 
 	if(!user.combat_mode && !(I.item_flags & ABSTRACT))
 		if(user.transferItemToLoc(I, drop_location(), silent = FALSE))
-			var/list/click_params = params2list(params)
 			//Center the icon where the user clicked.
-			if(!click_params || !click_params["icon-x"] || !click_params["icon-y"])
+			if(!LAZYACCESS(modifiers, ICON_X) || !LAZYACCESS(modifiers, ICON_Y))
 				return
 			//Clamp it so that the icon never moves more than 16 pixels in either direction (thus leaving the table turf)
-			I.pixel_x = clamp(text2num(click_params["icon-x"]) - 16, -(world.icon_size/2), world.icon_size/2)
-			I.pixel_y = clamp(text2num(click_params["icon-y"]) - 16, -(world.icon_size/2), world.icon_size/2)
+			I.pixel_x = clamp(text2num(LAZYACCESS(modifiers, ICON_X)) - 16, -(world.icon_size/2), world.icon_size/2)
+			I.pixel_y = clamp(text2num(LAZYACCESS(modifiers, ICON_Y)) - 16, -(world.icon_size/2), world.icon_size/2)
 			AfterPutItemOnTable(I, user)
 			return TRUE
 	else
@@ -310,6 +309,7 @@
 	icon = 'icons/obj/smooth_structures/glass_table.dmi'
 	icon_state = "glass_table-0"
 	base_icon_state = "glass_table"
+	custom_materials = list(/datum/material/glass = 2000)
 	buildstack = /obj/item/stack/sheet/glass
 	smoothing_groups = list(SMOOTH_GROUP_GLASS_TABLES)
 	canSmoothWith = list(SMOOTH_GROUP_GLASS_TABLES)
@@ -322,13 +322,17 @@
 	. = ..()
 	debris += new frame
 	debris += new /obj/item/shard
+	var/static/list/loc_connections = list(
+		COMSIG_ATOM_ENTERED = .proc/on_entered,
+	)
+	AddElement(/datum/element/connect_loc, src, loc_connections)
 
 /obj/structure/table/glass/Destroy()
 	QDEL_LIST(debris)
 	. = ..()
 
-/obj/structure/table/glass/Crossed(atom/movable/AM)
-	. = ..()
+/obj/structure/table/glass/proc/on_entered(datum/source, atom/movable/AM)
+	SIGNAL_HANDLER
 	if(flags_1 & NODECONSTRUCT_1)
 		return
 	if(!isliving(AM))
@@ -509,22 +513,21 @@
 	else
 		return "<span class='notice'>The top cover is firmly <b>welded</b> on.</span>"
 
-/obj/structure/table/reinforced/attackby(obj/item/W, mob/living/user, params)
-	var/list/modifiers = params2list(params)
-	if(W.tool_behaviour == TOOL_WELDER && modifiers && modifiers["right"])
-		if(!W.tool_start_check(user, amount=0))
-			return
+/obj/structure/table/reinforced/attackby_secondary(obj/item/weapon, mob/user, params)
+	if(weapon.tool_behaviour == TOOL_WELDER)
+		if(weapon.tool_start_check(user, amount = 0))
+			if(deconstruction_ready)
+				to_chat(user, "<span class='notice'>You start strengthening the reinforced table...</span>")
+				if (weapon.use_tool(src, user, 50, volume = 50))
+					to_chat(user, "<span class='notice'>You strengthen the table.</span>")
+					deconstruction_ready = FALSE
+			else
+				to_chat(user, "<span class='notice'>You start weakening the reinforced table...</span>")
+				if (weapon.use_tool(src, user, 50, volume = 50))
+					to_chat(user, "<span class='notice'>You weaken the table.</span>")
+					deconstruction_ready = TRUE
+		return SECONDARY_ATTACK_CANCEL_ATTACK_CHAIN
 
-		if(deconstruction_ready)
-			to_chat(user, "<span class='notice'>You start strengthening the reinforced table...</span>")
-			if (W.use_tool(src, user, 50, volume=50))
-				to_chat(user, "<span class='notice'>You strengthen the table.</span>")
-				deconstruction_ready = 0
-		else
-			to_chat(user, "<span class='notice'>You start weakening the reinforced table...</span>")
-			if (W.use_tool(src, user, 50, volume=50))
-				to_chat(user, "<span class='notice'>You weaken the table.</span>")
-				deconstruction_ready = 1
 	else
 		. = ..()
 
@@ -535,7 +538,7 @@
 	icon_state = "brass_table-0"
 	base_icon_state = "brass_table"
 	resistance_flags = FIRE_PROOF | ACID_PROOF
-	buildstack = /obj/item/stack/tile/bronze
+	buildstack = /obj/item/stack/sheet/bronze
 	smoothing_groups = list(SMOOTH_GROUP_BRONZE_TABLES) //Don't smooth with SMOOTH_GROUP_TABLES
 	canSmoothWith = list(SMOOTH_GROUP_BRONZE_TABLES)
 
@@ -559,6 +562,7 @@
 	can_buckle = 1
 	buckle_lying = NO_BUCKLE_LYING
 	buckle_requires_restraints = TRUE
+	custom_materials = list(/datum/material/silver = 2000)
 	var/mob/living/carbon/human/patient = null
 	var/obj/machinery/computer/operating/computer = null
 
@@ -633,7 +637,7 @@
 
 /obj/structure/rack/attackby(obj/item/W, mob/living/user, params)
 	var/list/modifiers = params2list(params)
-	if (W.tool_behaviour == TOOL_WRENCH && !(flags_1&NODECONSTRUCT_1) && modifiers && modifiers["right"])
+	if (W.tool_behaviour == TOOL_WRENCH && !(flags_1&NODECONSTRUCT_1) && LAZYACCESS(modifiers, RIGHT_CLICK))
 		W.play_tool_sound(src)
 		deconstruct(TRUE)
 		return
@@ -642,10 +646,10 @@
 	if(user.transferItemToLoc(W, drop_location()))
 		return 1
 
-/obj/structure/rack/attack_paw(mob/living/user)
-	attack_hand(user)
+/obj/structure/rack/attack_paw(mob/living/user, list/modifiers)
+	attack_hand(user, modifiers)
 
-/obj/structure/rack/attack_hand(mob/living/user)
+/obj/structure/rack/attack_hand(mob/living/user, list/modifiers)
 	. = ..()
 	if(.)
 		return
@@ -693,7 +697,7 @@
 
 /obj/item/rack_parts/attackby(obj/item/W, mob/user, params)
 	if (W.tool_behaviour == TOOL_WRENCH)
-		new /obj/item/stack/sheet/metal(user.loc)
+		new /obj/item/stack/sheet/iron(user.loc)
 		qdel(src)
 	else
 		. = ..()
